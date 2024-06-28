@@ -16,6 +16,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/lang/string.h"
 #include "common/log/log.h"
 #include "sql/stmt/filter_stmt.h"
+#include "sql/stmt/sorting_stmt.h"
 #include "storage/db/db.h"
 #include "storage/table/table.h"
 
@@ -144,10 +145,16 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
   }
 
   // TODO(Y-jiji): create order by clause
+  SortingStmt *sorting_stmt = nullptr;
   if (select_sql.sorting == nullptr) {
     LOG_INFO("no sorting requirments");
-  } else {
+  } else { 
     LOG_INFO("have sorting requirements");
+    RC rc = SortingStmt::create(db, default_table, &table_map, *select_sql.sorting, sorting_stmt);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("cannot construct sorting stmt");
+      return rc;
+    }
   }
 
   // everything alright
@@ -157,5 +164,6 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
   select_stmt->query_fields_.swap(query_fields);
   select_stmt->filter_stmt_ = filter_stmt;
   stmt                      = select_stmt;
+  // TODO(Y-jiji): add sorting stmt to select stmt
   return RC::SUCCESS;
 }
