@@ -15,6 +15,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/optimizer/logical_plan_generator.h"
 
 #include <common/log/log.h>
+#include <vector>
 
 #include "sql/operator/calc_logical_operator.h"
 #include "sql/operator/delete_logical_operator.h"
@@ -32,6 +33,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/stmt/filter_stmt.h"
 #include "sql/stmt/insert_stmt.h"
 #include "sql/stmt/select_stmt.h"
+#include "sql/stmt/sorting_stmt.h"
 #include "sql/stmt/stmt.h"
 
 using namespace std;
@@ -158,6 +160,12 @@ RC LogicalPlanGenerator::create_plan(FilterStmt *filter_stmt, unique_ptr<Logical
   }
 
   logical_operator = std::move(predicate_oper);
+  return RC::SUCCESS;
+}
+
+RC LogicalPlanGenerator::create_plan(SortingStmt *sorting_stmt, unique_ptr<LogicalOperator> &logical_operator)
+{
+  
   return RC::SUCCESS;
 }
 
