@@ -144,7 +144,11 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
   }
 
   // TODO(Y-jiji): create order by clause
-
+  if (select_sql.sorting == nullptr) {
+    LOG_INFO("no sorting requirments");
+  } else {
+    LOG_INFO("have sorting requirements");
+  }
 
   // everything alright
   SelectStmt *select_stmt = new SelectStmt();

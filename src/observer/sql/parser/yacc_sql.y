@@ -84,6 +84,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         VALUES
         FROM
         WHERE
+        ORDER
+        BY
         AND
         SET
         ON
@@ -102,6 +104,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %union {
   ParsedSqlNode *                   sql_node;
   ConditionSqlNode *                condition;
+  SortingSqlNode *                  sorting;
   Value *                           value;
   enum CompOp                       comp;
   RelAttrSqlNode *                  rel_attr;
@@ -136,6 +139,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <value_list>          value_list
 %type <condition_list>      where
 %type <condition_list>      condition_list
+%type <sorting>             order_by
 %type <rel_attr_list>       select_attr
 %type <relation_list>       rel_list
 %type <rel_attr_list>       attr_list
@@ -418,7 +422,7 @@ update_stmt:      /*  update 语句的语法解析树*/
     }
     ;
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT select_attr FROM ID rel_list where
+    SELECT select_attr FROM ID rel_list where order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
       if ($2 != nullptr) {
@@ -436,6 +440,10 @@ select_stmt:        /*  select 语句的语法解析树*/
         $$->selection.conditions.swap(*$6);
         delete $6;
       }
+      
+      $$->selection.sorting = $7;
+
+      /* why this is the last line? */
       free($4);
     }
     ;
@@ -631,6 +639,19 @@ condition:
       $$->comp = $2;
 
       delete $1;
+      delete $3;
+    }
+    ;
+order_by:
+    /* empty */
+    {
+      $$ = nullptr;
+    }
+    | ORDER BY rel_attr {
+      $$ = new SortingSqlNode;
+      $$->order = SortingOrder::ASCENDING;
+      $$->attr  = *$3;
+      
       delete $3;
     }
     ;
