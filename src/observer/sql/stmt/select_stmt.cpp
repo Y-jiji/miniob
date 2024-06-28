@@ -143,6 +143,9 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
     return rc;
   }
 
+  // TODO(Y-jiji): create order by clause
+
+
   // everything alright
   SelectStmt *select_stmt = new SelectStmt();
   // TODO add expression copy

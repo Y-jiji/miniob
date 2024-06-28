@@ -75,6 +75,28 @@ struct ConditionSqlNode
   Value          right_value;    ///< right-hand side value if right_is_attr = FALSE
 };
 
+
+/**
+ * @brief 表示排序的顺序
+ * @ingroup SQLParser
+ */
+enum SortingOrder
+{
+  ASCENDING,
+  DESCENDING,
+};
+
+/**
+ * @brief 表示一个排序子句
+ * @ingroup SQLParser
+ * @details 排序子句就是order by <字段>这种。
+ */
+struct SortingSqlNode
+{
+  SortingOrder    order;
+  RelAttrSqlNode  attr;
+};
+
 /**
  * @brief 描述一个select语句
  * @ingroup SQLParser
@@ -91,6 +113,7 @@ struct SelectSqlNode
   std::vector<RelAttrSqlNode>   attributes;  ///< attributes in select clause
   std::vector<std::string>      relations;   ///< 查询的表
   std::vector<ConditionSqlNode> conditions;  ///< 查询条件，使用AND串联起来多个条件
+  std::vector<SortingSqlNode>   sorting;     ///< 查询结果排序
 };
 
 /**
