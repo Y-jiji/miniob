@@ -15,8 +15,10 @@ See the Mulan PSL v2 for more details. */
 #include "sql/optimizer/logical_plan_generator.h"
 
 #include <common/log/log.h>
+#include <memory>
 #include <vector>
 
+#include "common/rc.h"
 #include "sql/operator/calc_logical_operator.h"
 #include "sql/operator/delete_logical_operator.h"
 #include "sql/operator/explain_logical_operator.h"
@@ -25,6 +27,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/logical_operator.h"
 #include "sql/operator/predicate_logical_operator.h"
 #include "sql/operator/project_logical_operator.h"
+#include "sql/operator/sorting_logical_operator.h"
 #include "sql/operator/table_get_logical_operator.h"
 
 #include "sql/stmt/calc_stmt.h"
@@ -108,17 +111,36 @@ RC LogicalPlanGenerator::create_plan(SelectStmt *select_stmt, unique_ptr<Logical
       table_oper = unique_ptr<LogicalOperator>(join_oper);
     }
   }
+  RC rc = RC::SUCCESS;
 
   unique_ptr<LogicalOperator> predicate_oper;
-
-  RC                          rc = create_plan(select_stmt->filter_stmt(), predicate_oper);
+  rc = create_plan(select_stmt->filter_stmt(), predicate_oper);
   if (rc != RC::SUCCESS) {
     LOG_WARN("failed to create predicate logical plan. rc=%s", strrc(rc));
     return rc;
   }
 
+  unique_ptr<LogicalOperator> sorting_oper;
+  rc = create_plan(select_stmt->sorting_stmt(), sorting_oper);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to create sorting logical plan. rc=%s", strrc(rc));
+    return rc;
+  }
+
   unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields));
-  if (predicate_oper) {
+  if (sorting_oper) {
+    if (predicate_oper) {
+      if (table_oper) {
+        predicate_oper->add_child(std::move(table_oper));
+      }
+      sorting_oper->add_child(std::move(predicate_oper));
+    } else {
+      if (table_oper) {
+        sorting_oper->add_child(std::move(table_oper));
+      }
+    }
+    project_oper->add_child(std::move(sorting_oper));
+  } else if (predicate_oper) {
     if (table_oper) {
       predicate_oper->add_child(std::move(table_oper));
     }
@@ -165,7 +187,11 @@ RC LogicalPlanGenerator::create_plan(FilterStmt *filter_stmt, unique_ptr<Logical
 
 RC LogicalPlanGenerator::create_plan(SortingStmt *sorting_stmt, unique_ptr<LogicalOperator> &logical_operator)
 {
-  
+  if (sorting_stmt == nullptr) {
+    return RC::SUCCESS;
+  }
+  unique_ptr<SortingLogicalOperator> sorting_oper = make_unique<SortingLogicalOperator>(sorting_stmt->attr());
+  logical_operator = std::move(sorting_oper);
   return RC::SUCCESS;
 }
 

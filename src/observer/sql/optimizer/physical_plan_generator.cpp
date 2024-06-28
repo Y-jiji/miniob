@@ -12,6 +12,7 @@ See the Mulan PSL v2 for more details. */
 // Created by Wangyunlai on 2022/12/14.
 //
 
+#include <memory>
 #include <utility>
 
 #include "common/log/log.h"
@@ -27,10 +28,14 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/insert_physical_operator.h"
 #include "sql/operator/join_logical_operator.h"
 #include "sql/operator/join_physical_operator.h"
+#include "sql/operator/logical_operator.h"
+#include "sql/operator/physical_operator.h"
 #include "sql/operator/predicate_logical_operator.h"
 #include "sql/operator/predicate_physical_operator.h"
 #include "sql/operator/project_logical_operator.h"
 #include "sql/operator/project_physical_operator.h"
+#include "sql/operator/sorting_logical_operator.h"
+#include "sql/operator/sorting_physical_operator.h"
 #include "sql/operator/table_get_logical_operator.h"
 #include "sql/operator/table_scan_physical_operator.h"
 #include "sql/optimizer/physical_plan_generator.h"
@@ -52,6 +57,10 @@ RC PhysicalPlanGenerator::create(LogicalOperator &logical_operator, unique_ptr<P
 
     case LogicalOperatorType::PREDICATE: {
       return create_plan(static_cast<PredicateLogicalOperator &>(logical_operator), oper);
+    } break;
+
+    case LogicalOperatorType::SORTING: {
+      return create_plan(static_cast<SortingLogicalOperator &>(logical_operator), oper);
     } break;
 
     case LogicalOperatorType::PROJECTION: {
@@ -167,6 +176,22 @@ RC PhysicalPlanGenerator::create_plan(PredicateLogicalOperator &pred_oper, uniqu
   unique_ptr<Expression> expression = std::move(expressions.front());
   oper = unique_ptr<PhysicalOperator>(new PredicatePhysicalOperator(std::move(expression)));
   oper->add_child(std::move(child_phy_oper));
+  return rc;
+}
+
+RC PhysicalPlanGenerator::create_plan(SortingLogicalOperator &sorting_oper, unique_ptr<PhysicalOperator> &oper)
+{
+  RC rc = RC::SUCCESS;
+
+  LogicalOperator&              child_oper_logical = *sorting_oper.children().front();
+  unique_ptr<PhysicalOperator>  child_oper;
+  rc = create(child_oper_logical, child_oper);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to create child operator of sorting operator. rc=%s", strrc(rc));
+    return rc;
+  }
+  oper = unique_ptr<PhysicalOperator>(new SortingPhysicalOperator(sorting_oper.field()));
+  oper->add_child(std::move(child_oper));
   return rc;
 }
 

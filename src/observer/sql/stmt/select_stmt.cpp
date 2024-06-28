@@ -162,8 +162,9 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
   // TODO add expression copy
   select_stmt->tables_.swap(tables);
   select_stmt->query_fields_.swap(query_fields);
-  select_stmt->filter_stmt_ = filter_stmt;
-  stmt                      = select_stmt;
+  select_stmt->filter_stmt_   = filter_stmt;
+  select_stmt->sorting_stmt_  = sorting_stmt;
+  stmt                        = select_stmt;
   // TODO(Y-jiji): add sorting stmt to select stmt
   return RC::SUCCESS;
 }

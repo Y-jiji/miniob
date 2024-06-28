@@ -34,7 +34,7 @@ public:
 
   LogicalOperatorType type() const override { return LogicalOperatorType::SORTING; }
 
-  const Field &fields() const { return field_; }
+  const Field &field() const { return field_; }
 
 private:
   //! 并不是所有的select都会查看表字段，也可能是常量数字、字符串，
