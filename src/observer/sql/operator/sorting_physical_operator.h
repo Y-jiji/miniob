@@ -14,8 +14,10 @@ See the Mulan PSL v2 for more details. */
 
 #pragma once
 
+#include "sql/expr/tuple.h"
 #include "sql/operator/physical_operator.h"
 #include "storage/field/field.h"
+#include <vector>
 
 /**
  * @brief 排序物理算子
@@ -38,5 +40,6 @@ public:
 
 private:
   Field field_;
-  ProjectTuple tuple_;
+  std::vector<ValueListTuple>           tuple_all_;
+  std::vector<ValueListTuple>::iterator tuple_;
 };

@@ -1,5 +1,6 @@
 #include "sql/operator/sorting_physical_operator.h"
 #include "common/log/log.h"
+#include "sql/expr/tuple.h"
 #include "storage/field/field.h"
 #include "storage/record/record.h"
 #include "storage/table/table.h"
@@ -21,27 +22,43 @@ RC SortingPhysicalOperator::open(Trx *trx)
     return rc;
   }
 
-  return RC::SUCCESS;
+  while (true) {
+    ValueListTuple tuple;
+    tuple.set_cells(child->current_tuple()->to_value_list());
+    tuple_all_.push_back(tuple);
+    rc = child->next();
+    if (rc != RC::SUCCESS) break;
+  }
+
+  if (rc == RC::RECORD_EOF) {
+    return child->close();
+  }
+
+  tuple_ = tuple_all_.begin();
+
+  return rc;
 }
 
 RC SortingPhysicalOperator::next()
 {
-  if (children_.empty()) {
+  ++tuple_;
+  if (tuple_ == tuple_all_.end()) {
     return RC::RECORD_EOF;
+  } else {
+    return RC::SUCCESS;
   }
-  return children_[0]->next();
 }
 
 RC SortingPhysicalOperator::close()
 {
-  if (!children_.empty()) {
-    children_[0]->close();
-  }
   return RC::SUCCESS;
 }
 
 Tuple *SortingPhysicalOperator::current_tuple()
 {
-  tuple_.set_tuple(children_[0]->current_tuple());
-  return &tuple_;
+  if (tuple_ != tuple_all_.end()) {
+    return &*tuple_;
+  } else {
+    return nullptr;
+  }
 }
