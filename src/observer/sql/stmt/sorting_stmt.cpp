@@ -6,10 +6,11 @@
 #include "storage/db/db.h"
 #include "storage/field/field.h"
 #include "storage/table/table.h"
+#include <vector>
 
 SortingStmt::~SortingStmt() {}
 
-const Field& SortingStmt::attr() { return this->attr_; }
+const std::vector<Field>& SortingStmt::attr() { return this->attr_; }
 
 static RC get_table_and_field(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
     const RelAttrSqlNode &attr, Table *&table, const FieldMeta *&field);
@@ -20,14 +21,17 @@ RC SortingStmt::create(Db *db, Table *default_table, std::unordered_map<std::str
 
   SortingStmt *tmp_stmt = new SortingStmt();
 
-  Table           *table = nullptr;
-  const FieldMeta *field = nullptr;
-  rc = get_table_and_field(db, default_table, tables, sorting.attr, table, field);
+  for (auto attr: *sorting.attr) {
+    Table           *table = nullptr;
+    const FieldMeta *field = nullptr;
+    rc = get_table_and_field(db, default_table, tables, attr, table, field);
+    tmp_stmt->attr_.push_back(Field(table, field));
+    if (rc != RC::SUCCESS) { return rc; }
+  }
   if (rc != RC::SUCCESS) {
     LOG_WARN("cannot find attr");
     return rc;
   }
-  tmp_stmt->attr_ = Field(table, field);
   stmt            = tmp_stmt;
   return rc;
 }

@@ -93,8 +93,8 @@ enum SortingOrder
  */
 struct SortingSqlNode
 {
-  SortingOrder    order;
-  RelAttrSqlNode  attr;
+  SortingOrder                  order;
+  std::vector<RelAttrSqlNode>*  attr;
 };
 
 /**

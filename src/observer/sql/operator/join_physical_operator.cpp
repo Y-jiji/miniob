@@ -13,6 +13,7 @@ See the Mulan PSL v2 for more details. */
 //
 
 #include "sql/operator/join_physical_operator.h"
+#include "sql/expr/tuple.h"
 
 NestedLoopJoinPhysicalOperator::NestedLoopJoinPhysicalOperator() {}
 
@@ -82,7 +83,12 @@ RC NestedLoopJoinPhysicalOperator::close()
   return rc;
 }
 
-Tuple *NestedLoopJoinPhysicalOperator::current_tuple() { return &joined_tuple_; }
+Tuple *NestedLoopJoinPhysicalOperator::current_tuple() {
+  auto joined_tuple_ = new JoinedTuple;
+  joined_tuple_->set_left(left_->current_tuple());
+  joined_tuple_->set_right(right_->current_tuple());
+  return joined_tuple_;
+}
 
 RC NestedLoopJoinPhysicalOperator::left_next()
 {

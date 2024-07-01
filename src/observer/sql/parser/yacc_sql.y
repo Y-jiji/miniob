@@ -647,12 +647,15 @@ order_by:
     {
       $$ = nullptr;
     }
-    | ORDER BY rel_attr {
+    | ORDER BY rel_attr attr_list {
       $$ = new SortingSqlNode;
       $$->order = SortingOrder::ASCENDING;
-      $$->attr  = *$3;
-      
-      delete $3;
+      if ($4 != nullptr) {
+        $$->attr = $4;
+      } else {
+        $$->attr = new std::vector<RelAttrSqlNode>;
+      }
+      $$->attr->emplace_back(*$3);
     }
     ;
 

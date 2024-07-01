@@ -29,16 +29,16 @@ See the Mulan PSL v2 for more details. */
 class SortingLogicalOperator : public LogicalOperator
 {
 public:
-  SortingLogicalOperator(const Field &field);
+  SortingLogicalOperator(const std::vector<Field> &field);
   virtual ~SortingLogicalOperator() = default;
 
   LogicalOperatorType type() const override { return LogicalOperatorType::SORTING; }
 
-  const Field &field() const { return field_; }
+  const std::vector<Field> &field() const { return field_; }
 
 private:
   //! 并不是所有的select都会查看表字段，也可能是常量数字、字符串，
   //! 或者是执行某个函数。所以这里应该是表达式Expression。
   //! 不过现在简单处理，就使用字段来描述
-  Field field_;
+  std::vector<Field> field_;
 };

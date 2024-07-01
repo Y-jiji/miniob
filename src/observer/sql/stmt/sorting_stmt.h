@@ -35,7 +35,7 @@ public:
   virtual ~SortingStmt();
 
 public:
-  const Field& attr();
+  const std::vector<Field>& attr();
   static RC create(
     Db *db, Table *default_table, 
     std::unordered_map<std::string, Table *> *tables, 
@@ -44,5 +44,5 @@ public:
   );
 
 private:
-  Field attr_;
+  std::vector<Field> attr_;
 };

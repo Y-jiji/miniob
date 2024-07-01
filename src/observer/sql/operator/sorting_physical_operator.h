@@ -27,7 +27,7 @@ See the Mulan PSL v2 for more details. */
 class SortingPhysicalOperator : public PhysicalOperator
 {
 public:
-  SortingPhysicalOperator(const Field& field);
+  SortingPhysicalOperator(const std::vector<Field>& field);
 
   virtual ~SortingPhysicalOperator() = default;
 
@@ -40,7 +40,7 @@ public:
   Tuple *current_tuple() override;
 
 private:
-  Field   field_;
+  std::vector<Field>  field_;
   std::vector<Tuple*>                           tuple_all_;
   std::optional<std::vector<Tuple*>::iterator>  tuple_iter_;
   void flush();

@@ -17,7 +17,7 @@ struct StringException : public std::exception
    const char* what() const throw() { return s.c_str(); }
 };
 
-SortingPhysicalOperator::SortingPhysicalOperator(const Field& field):
+SortingPhysicalOperator::SortingPhysicalOperator(const std::vector<Field>& field):
   field_(field)   
 {}
 
@@ -43,11 +43,16 @@ RC SortingPhysicalOperator::open(Trx *trx)
   }
 
   std::sort(tuple_all_.begin(), tuple_all_.end(), [&](Tuple* a, Tuple* b) {
-    auto spec = TupleCellSpec(field_.table_name(), field_.field_name());
-    Value cell_a, cell_b;
-    a->find_cell(spec, cell_a);
-    b->find_cell(spec, cell_b);
-    return cell_a.compare(cell_b) <= 0;
+    for (auto f = field_.rbegin(); f != field_.rend(); ++f) {
+      auto spec = TupleCellSpec(f->table_name(), f->field_name());
+      Value cell_a, cell_b;
+      a->find_cell(spec, cell_a);
+      b->find_cell(spec, cell_b);
+      auto cmp = cell_a.compare(cell_b);
+      if (cmp == 0) continue;
+      return cell_a.compare(cell_b) < 0;
+    }
+    return false;
   });
 
   tuple_iter_.reset();
