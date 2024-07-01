@@ -953,7 +953,7 @@ RC MysqlCommunicator::send_result_rows(SqlResult *sql_result, bool no_column_def
   Tuple *tuple         = nullptr;
   while (RC::SUCCESS == (rc = sql_result->next_tuple(tuple))) {
     assert(tuple != nullptr);
-
+    std::cout << "final tuple: " << tuple->to_string() << std::endl;
     affected_rows++;
 
     const int cell_num = tuple->cell_num();

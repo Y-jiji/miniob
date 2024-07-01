@@ -243,6 +243,7 @@ RC PlainCommunicator::write_result_internal(SessionEvent *event, bool &need_disc
   Tuple *tuple = nullptr;
   while (RC::SUCCESS == (rc = sql_result->next_tuple(tuple))) {
     assert(tuple != nullptr);
+    std::cout << "final tuple: " << tuple->to_string() << std::endl;
 
     int cell_num = tuple->cell_num();
     for (int i = 0; i < cell_num; i++) {

@@ -17,6 +17,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/expr/tuple.h"
 #include "sql/operator/physical_operator.h"
 #include "storage/field/field.h"
+#include <optional>
 #include <vector>
 
 /**
@@ -39,7 +40,7 @@ public:
   Tuple *current_tuple() override;
 
 private:
-  Field field_;
-  std::vector<ValueListTuple>           tuple_all_;
-  std::vector<ValueListTuple>::iterator tuple_;
+  Field   field_;
+  std::vector<Tuple*>                           tuple_all_;
+  std::optional<std::vector<Tuple*>::iterator>  tuple_iter_;
 };

@@ -116,7 +116,8 @@ public:
   virtual std::vector<Value> to_value_list() const
   {
     std::vector<Value> value_list;
-    for (int i = 0; i < cell_num(); ++i) {
+    const int cell_num = this->cell_num();
+    for (int i = 0; i < cell_num; ++i) {
       Value cell;
       cell_at(i, cell);
       value_list.push_back(cell);

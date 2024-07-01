@@ -14,6 +14,8 @@ See the Mulan PSL v2 for more details. */
 
 #include "sql/operator/table_scan_physical_operator.h"
 #include "event/sql_debug.h"
+#include "sql/expr/tuple.h"
+#include "storage/record/record.h"
 #include "storage/table/table.h"
 
 using namespace std;
@@ -58,8 +60,11 @@ RC TableScanPhysicalOperator::close() { return record_scanner_.close_scan(); }
 
 Tuple *TableScanPhysicalOperator::current_tuple()
 {
-  tuple_.set_record(&current_record_);
-  return &tuple_;
+  auto tuple_ = new RowTuple();
+  auto record_ = new Record(current_record_);
+  tuple_->set_record(record_);
+  tuple_->set_schema(table_, table_->table_meta().field_metas());
+  return tuple_;
 }
 
 string TableScanPhysicalOperator::param() const { return table_->name(); }
