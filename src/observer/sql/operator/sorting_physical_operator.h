@@ -43,4 +43,5 @@ private:
   Field   field_;
   std::vector<Tuple*>                           tuple_all_;
   std::optional<std::vector<Tuple*>::iterator>  tuple_iter_;
+  void flush();
 };

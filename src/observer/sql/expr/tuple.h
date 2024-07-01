@@ -14,6 +14,7 @@ See the Mulan PSL v2 for more details. */
 
 #pragma once
 
+#include <json/value.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -111,6 +112,18 @@ public:
       str += cell.to_string();
     }
     return str;
+  }
+
+  virtual Json::Value to_json() const
+  {
+    Json::Value value;
+    const int cell_num = this->cell_num();
+    for (int i = 0; i < cell_num; ++i) {
+      Value cell;
+      cell_at(i, cell);
+      value[i] = cell.to_json();
+    }
+    return value;
   }
 
   virtual std::vector<Value> to_value_list() const

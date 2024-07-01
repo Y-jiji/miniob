@@ -18,6 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/log/log.h"
 #include <exception>
 #include <iostream>
+#include <json/value.h>
 #include <sstream>
 
 const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "floats", "booleans"};
@@ -155,6 +156,29 @@ std::string Value::to_string() const
     } break;
   }
   return os.str();
+}
+
+Json::Value Value::to_json() const
+{
+  Json::Value json;
+  switch (attr_type_) {
+    case INTS: {
+      json = num_value_.int_value_;
+    } break;
+    case FLOATS: {
+      json = num_value_.float_value_;
+    } break;
+    case BOOLEANS: {
+      json = num_value_.bool_value_;
+    } break;
+    case CHARS: {
+      json = str_value_;
+    } break;
+    default: {
+      LOG_WARN("unsupported attr type: %d", attr_type_);
+    } break;
+  }
+  return json;
 }
 
 int Value::compare(const Value &other) const

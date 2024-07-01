@@ -14,6 +14,7 @@ See the Mulan PSL v2 for more details. */
 
 #pragma once
 
+#include <json/value.h>
 #include <string>
 
 /**
@@ -61,6 +62,7 @@ public:
   void set_value(const Value &value);
 
   std::string to_string() const;
+  Json::Value to_json() const;
 
   int compare(const Value &other) const;
 
